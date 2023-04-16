@@ -8,6 +8,7 @@ import (
 
 	helper "github.com/omjogani/bookmark-manager/helpers"
 	model "github.com/omjogani/bookmark-manager/models"
+	"github.com/omjogani/bookmark-manager/validations"
 )
 
 func RegisterUser(w http.ResponseWriter, r *http.Request) {
@@ -24,7 +25,13 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	user.UserName = receivedData.UserName
 
 	fmt.Println(user)
-	helper.RegisterUserHelper(user)
+	responseFromValidation := validations.IsUserValid(user)
+	if responseFromValidation == "OK" {
+		helper.RegisterUserHelper(user)
+		json.NewEncoder(w).Encode("User Registered Successfully!")
+	} else {
+		json.NewEncoder(w).Encode(responseFromValidation)
+	}
 }
 
 func LoginUser(w http.ResponseWriter, r *http.Request) {
