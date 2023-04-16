@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 
+	helper "github.com/omjogani/bookmark-manager/helpers"
 	model "github.com/omjogani/bookmark-manager/models"
 )
 
@@ -14,12 +15,16 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Allow-Control-Allow-Methods", "POST")
 
 	var user model.User
-	error := json.NewDecoder(r.Body).Decode(&user)
+	var receivedData model.User
+	error := json.NewDecoder(r.Body).Decode(&receivedData)
 	checkNilError(error)
 
-	fmt.Println(user)
+	user.Email = receivedData.Email
+	user.Password = receivedData.Password
+	user.UserName = receivedData.UserName
 
-	// TODO: Integrate RegisterUser here
+	fmt.Println(user)
+	helper.RegisterUserHelper(user)
 }
 
 func LoginUser(w http.ResponseWriter, r *http.Request) {

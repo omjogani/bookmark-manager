@@ -29,6 +29,7 @@ func RegisterUserHelper(user model.User) {
 		Password: user.Password,
 	})
 	checkNilError(err)
+	// TODO: Store username of User to DB
 }
 
 func LoginUserHelper(user model.User) {
