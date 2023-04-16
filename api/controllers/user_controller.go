@@ -39,10 +39,22 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Allow-Control-Allow-Methods", "POST")
 
 	var user model.User
-	error := json.NewDecoder(r.Body).Decode(&user)
+	var receivedData model.User
+	error := json.NewDecoder(r.Body).Decode(&receivedData)
 	checkNilError(error)
 
-	// TODO: Integrate LoginUser here
+	user.Email = receivedData.Email
+	user.Password = receivedData.Password
+	user.UserName = "Demo"
+
+	responseFromValidation := validations.IsUserValid(user)
+	if responseFromValidation == "OK" {
+		helper.LoginUserHelper(user)
+		json.NewEncoder(w).Encode(responseFromValidation)
+	} else {
+		json.NewEncoder(w).Encode(responseFromValidation)
+	}
+
 }
 
 func checkNilError(err error) {

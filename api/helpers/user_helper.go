@@ -33,11 +33,14 @@ func RegisterUserHelper(user model.User) {
 }
 
 func LoginUserHelper(user model.User) {
-	_, err := supabase.Auth.SignIn(context.Background(), supa.UserCredentials{
+	userDB, err := supabase.Auth.SignIn(context.Background(), supa.UserCredentials{
 		Email:    user.Email,
 		Password: user.Password,
 	})
+
 	checkNilError(err)
+	fmt.Println(userDB.User.ID)
+	fmt.Println(userDB.AccessToken)
 }
 
 func checkNilError(err error) {
