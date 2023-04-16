@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 
 	"github.com/joho/godotenv"
 	supa "github.com/nedpals/supabase-go"
@@ -32,7 +33,7 @@ func RegisterUserHelper(user model.User) {
 	// TODO: Store username of User to DB
 }
 
-func LoginUserHelper(user model.User) {
+func LoginUserHelper(user model.User) map[string]string {
 	userDB, err := supabase.Auth.SignIn(context.Background(), supa.UserCredentials{
 		Email:    user.Email,
 		Password: user.Password,
@@ -41,6 +42,18 @@ func LoginUserHelper(user model.User) {
 	checkNilError(err)
 	fmt.Println(userDB.User.ID)
 	fmt.Println(userDB.AccessToken)
+	fmt.Println(userDB.ExpiresIn)
+	responseValues := map[string]string{
+		"accessToken": userDB.AccessToken,
+		"userId":      userDB.User.ID,
+		"expiresIn":   strconv.Itoa(userDB.ExpiresIn),
+	}
+	return responseValues
+}
+
+func LogOutUserHelper(userToken string) {
+	err := supabase.Auth.SignOut(context.Background(), userToken)
+	checkNilError(err)
 }
 
 func checkNilError(err error) {

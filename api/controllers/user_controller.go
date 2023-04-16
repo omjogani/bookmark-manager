@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
+	"time"
 
 	helper "github.com/omjogani/bookmark-manager/helpers"
 	model "github.com/omjogani/bookmark-manager/models"
@@ -49,12 +51,45 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 
 	responseFromValidation := validations.IsUserValid(user)
 	if responseFromValidation == "OK" {
-		helper.LoginUserHelper(user)
+		responseData := helper.LoginUserHelper(user)
+		expiryFromResponseData, err := strconv.ParseInt(responseData["expiresIn"], 10, 64)
+		checkNilError(err)
+		expiry := time.Unix(expiryFromResponseData, 0)
+
+		// Set Cookie for Authorization
+		cookie := http.Cookie{}
+		cookie.Name = "accessToken"
+		cookie.Value = responseData["accessToken"]
+		cookie.Expires = expiry
+		cookie.Secure = true
+		cookie.SameSite = http.SameSiteStrictMode
+		http.SetCookie(w, &cookie)
+
 		json.NewEncoder(w).Encode(responseFromValidation)
 	} else {
 		json.NewEncoder(w).Encode(responseFromValidation)
 	}
+}
 
+func LogOut(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/x-www-form-urlencode")
+
+	accessToken, err := r.Cookie("accesstoken")
+	if err != nil {
+		log.Fatal("Hello World", err)
+	}
+	// checkNilError(err)
+
+	// Get UserToken from Cookie
+	helper.LogOutUserHelper(accessToken.Value)
+
+	// Delete Cookie
+	cookie := http.Cookie{}
+	cookie.Name = "accesstoken"
+	cookie.Value = ""
+	cookie.Expires = time.Now().AddDate(0, 0, -1)
+	cookie.MaxAge = -1
+	http.SetCookie(w, &cookie)
 }
 
 func checkNilError(err error) {
