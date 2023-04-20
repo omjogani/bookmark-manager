@@ -2,7 +2,6 @@ package controller
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -19,14 +18,13 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 
 	var user model.User
 	var receivedData model.User
-	error := json.NewDecoder(r.Body).Decode(&receivedData)
-	checkNilError(error)
+	err := json.NewDecoder(r.Body).Decode(&receivedData)
+	checkNilError(err)
 
 	user.Email = receivedData.Email
 	user.Password = receivedData.Password
 	user.UserName = receivedData.UserName
 
-	fmt.Println(user)
 	responseFromValidation := validations.IsUserValid(user)
 	if responseFromValidation == "OK" {
 		helper.RegisterUserHelper(user)
@@ -75,10 +73,7 @@ func LogOut(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/x-www-form-urlencode")
 
 	accessToken, err := r.Cookie("accesstoken")
-	if err != nil {
-		log.Fatal("Hello World", err)
-	}
-	// checkNilError(err)
+	checkNilError(err)
 
 	// Get UserToken from Cookie
 	helper.LogOutUserHelper(accessToken.Value)
